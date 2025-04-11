@@ -114,9 +114,10 @@
         timeout: 120
 
     - name: get master DB status
-      command: docker exec db-master mysql -uroot -p{{ lookup('env', 'MYSQL_ROOT_PASSWORD') }} -e "SHOW MASTER STATUS\\G"
+      shell: >
+        mysql -h 127.0.0.1 -P 3306 -uroot -p{{ lookup('env', 'MYSQL_ROOT_PASSWORD') }} -e "SHOW MASTER STATUS\G"
       register: master_status
-      changed_when: false
+      delegate_to: localhost
 
     - name: binlog file extracting
       set_fact:
