@@ -15,15 +15,17 @@
           - ca-certificates
           - curl
           - software-properties-common
+          - mariadb-client
         state: present
         update_cache: yes
-      when: ansible_facts['os_family'] == "Ubuntu"
+      when: ansible_facts['os_family'] == "Debian"
 
     - name: Install dependencies on RHEL-like
       dnf:
         name:
           - dnf-plugins-core
           - curl
+          - mariadb
         state: present
         update_cache: yes
       when: ansible_facts['os_family'] == "RedHat"
