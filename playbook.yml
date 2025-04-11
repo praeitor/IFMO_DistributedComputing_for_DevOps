@@ -107,7 +107,7 @@
     - name: wait for slave DB
       wait_for:
         host: 127.0.0.1
-        port: 3306
+        port: 3307
         delay: 5
         timeout: 120
 

@@ -18,6 +18,8 @@ services:
     volumes:
       - ./slave.cnf:/etc/mysql/conf.d/slave.cnf
       - db_slave_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
     depends_on:
       - db-master
 
