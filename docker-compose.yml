@@ -1,24 +1,40 @@
 services:
-  db:
+  db-master:
     image: mariadb:11.7
-    restart: always
+    container_name: db-master
     env_file:
       - .env
     volumes:
-      - db_data:/var/lib/mysql
+      - ./confs/master.cnf:/etc/mysql/conf.d/master.cnf
+      - db_master_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  db-slave:
+    image: mariadb:11.7
+    container_name: db-slave
+    env_file:
+      - .env
+    volumes:
+      - ./confs/slave.cnf:/etc/mysql/conf.d/slave.cnf
+      - db_slave_data:/var/lib/mysql
+    depends_on:
+      - db-master
 
   wordpress:
     image: wordpress:6.7
     depends_on:
-      - db
+      - db-master
     ports:
       - "80:80"
-    restart: always
-    env_file:
+    environment:
+      WORDPRESS_DB_HOST: db-master:3306
+    env_file: 
       - .env
     volumes:
       - wp_data:/var/www/html
 
 volumes:
-  db_data:
+  db_master_data:
+  db_slave_data:
   wp_data:
