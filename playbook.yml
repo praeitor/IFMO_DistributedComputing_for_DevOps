@@ -59,6 +59,16 @@
         path: /opt/wordpress
         state: directory
 
+    - name: copy master.cnf
+      copy:
+        src: confs/master.cnf
+        dest: /opt/wordpress/master.cnf
+
+    - name: copy slave.cnf
+      copy:
+        src: confs/slave.cnf
+        dest: /opt/wordpress/slave.cnf
+
     - name: copy docker-compose.yml
       copy:
         src: docker-compose.yml

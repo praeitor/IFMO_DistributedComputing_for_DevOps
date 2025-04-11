@@ -5,7 +5,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./confs/master.cnf:/etc/mysql/conf.d/master.cnf
+      - ./master.cnf:/etc/mysql/conf.d/master.cnf
       - db_master_data:/var/lib/mysql
     ports:
       - "3306:3306"
@@ -16,7 +16,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./confs/slave.cnf:/etc/mysql/conf.d/slave.cnf
+      - ./slave.cnf:/etc/mysql/conf.d/slave.cnf
       - db_slave_data:/var/lib/mysql
     depends_on:
       - db-master
