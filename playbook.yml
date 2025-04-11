@@ -84,7 +84,7 @@
         project_src: /opt/wordpress
         state: absent
 
-    - name: run dokcer compose (v2)
+    - name: run docker compose (v2)
       community.docker.docker_compose_v2:
         project_src: /opt/wordpress
         state: present
@@ -94,11 +94,11 @@
       ignore_errors: true
 
     - name: wait for master DB
-      shell: docker exec db-master sh -c 'until mysqladmin ping -h localhost --silent; do sleep 1; done'
-      register: wait_master
-      retries: 10
-      delay: 3
-      until: wait_master.rc == 0
+      wait_for:
+        host: 127.0.0.1
+        port: 3306
+        delay: 5
+        timeout: 120
 
     - name: logs from db-slave (debug)
       shell: docker logs db-master | tail -n 20
