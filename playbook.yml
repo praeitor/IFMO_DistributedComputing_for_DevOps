@@ -78,3 +78,44 @@
       community.docker.docker_compose_v2:
         project_src: /opt/wordpress
         state: present
+
+    - name: wait for master DB
+      shell: docker exec db-master sh -c 'until mysqladmin ping -h localhost --silent; do sleep 1; done'
+      register: wait_master
+      retries: 10
+      delay: 3
+      until: wait_master.rc == 0
+
+    - name: wait for slave DB
+      shell: docker exec db-slave sh -c 'until mysqladmin ping -h localhost --silent; do sleep 1; done'
+      register: wait_slave
+      retries: 10
+      delay: 3
+      until: wait_slave.rc == 0
+
+    - name: get master DB status
+      command: docker exec db-master mysql -uroot -p{{ lookup('env', 'MYSQL_ROOT_PASSWORD') }} -e "SHOW MASTER STATUS\\G"
+      register: master_status
+      changed_when: false
+
+    - name: binlog file extracting
+      set_fact:
+        binlog_file: "{{ master_status.stdout | regex_search('File: (.*)', '\\1') }}"
+
+    - name: binlog position extracting
+      set_fact:
+        binlog_pos: "{{ master_status.stdout | regex_search('Position: (\\d+)', '\\1') }}"
+
+    - name: make the slave config
+      shell: >
+        docker exec db-slave mysql -uroot -p{{ lookup('env', 'MYSQL_ROOT_PASSWORD') }}
+        -e "CHANGE MASTER TO
+        MASTER_HOST='db-master',
+        MASTER_USER='{{ lookup('env', 'MYSQL_USER') }}',
+        MASTER_PASSWORD='{{ lookup('env', 'MYSQL_PASSWORD') }}',
+        MASTER_LOG_FILE='{{ binlog_file }}',
+        MASTER_LOG_POS={{ binlog_pos }},
+        GET_MASTER_PUBLIC_KEY=1;"
+
+    - name: start slave
+      command: docker exec db-slave mysql -uroot -p{{ lookup('env', 'MYSQL_ROOT_PASSWORD') }} -e "START SLAVE;"
