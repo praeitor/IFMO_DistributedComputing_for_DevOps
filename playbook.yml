@@ -118,6 +118,7 @@
         mysql -h 127.0.0.1 -P 3306 -uroot -p{{ lookup('env', 'MYSQL_ROOT_PASSWORD') }} -e "SHOW MASTER STATUS\G"
       register: master_status
       delegate_to: localhost
+      become: false
 
     - name: binlog file extracting
       set_fact:
