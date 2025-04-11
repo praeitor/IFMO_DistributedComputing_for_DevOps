@@ -89,12 +89,20 @@
         project_src: /opt/wordpress
         state: present
 
+    - name: logs from db-master (debug)
+      shell: docker logs db-master | tail -n 20
+      ignore_errors: true
+
     - name: wait for master DB
       shell: docker exec db-master sh -c 'until mysqladmin ping -h localhost --silent; do sleep 1; done'
       register: wait_master
       retries: 10
       delay: 3
       until: wait_master.rc == 0
+
+    - name: logs from db-slave (debug)
+      shell: docker logs db-master | tail -n 20
+      ignore_errors: true
 
     - name: wait for slave DB
       shell: docker exec db-slave sh -c 'until mysqladmin ping -h localhost --silent; do sleep 1; done'
