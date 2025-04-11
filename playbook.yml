@@ -105,11 +105,11 @@
       ignore_errors: true
 
     - name: wait for slave DB
-      shell: docker exec db-slave sh -c 'until mysqladmin ping -h localhost --silent; do sleep 1; done'
-      register: wait_slave
-      retries: 10
-      delay: 3
-      until: wait_slave.rc == 0
+      wait_for:
+        host: 127.0.0.1
+        port: 3306
+        delay: 5
+        timeout: 120
 
     - name: get master DB status
       command: docker exec db-master mysql -uroot -p{{ lookup('env', 'MYSQL_ROOT_PASSWORD') }} -e "SHOW MASTER STATUS\\G"
